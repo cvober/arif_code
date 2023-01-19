@@ -1,6 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <unordered_map>
+#include <cmath>
 
 const int SIZE_TABLE_CODE = 255;
 
@@ -25,40 +27,160 @@ namespace ns_file
 
 /*
 Функция которая вычисляет частоту встречи символов в файле
-Вектор должен быть ассоцирован с таблицой символов. По умолчанию
-предполагается таблица ASCI
 
 На вход:
 Строка из которой необходимо получить частоты
-Вектор куда сохранять результат
+Карта в которой будет результат
 
 На выход:
-Код возрата
-Измененные данные входного аргумента массив
+Конечная частота
 
 */
-error_code_t get_frequency(const std::string& _text, std::vector<int>& _table)
+
+double arithmetic_coding_probability(
+    const std::string _text, 
+    std::unordered_map<char, double>& _probabilities
+    ) 
 {
-    if(_text.empty())
+    // Создание карты символов и их вероятностей
+    
+    int input_length = _text.length();
+    
+    for (size_t i = 0; i < input_length; i++) 
     {
-        //Обнуляем вектор так как нету символов
-        for(size_t i = 0; i < _table.size(); _table.at(i) = 0, ++i);
-        return 0;
+        if (_probabilities.find(_text[i]) == _probabilities.end()) 
+        {
+            _probabilities[_text[i]] = 1;
+        } 
+        
+        else 
+        {
+            _probabilities[_text[i]]++;
+        }
     }
 
+    for (auto& probability : _probabilities) {
+        probability.second /= input_length;
+    }
+
+    // Подсчет вероятности арифметического кодирования
+    double probability = 1;
+    
+    for (auto& p : _probabilities) 
+    {
+        probability *= pow(p.second, p.second);
+    }
+
+    return probability;
+}
+
+
+void build_interval_table(
+    const std::unordered_map<char, double>& _probabilities, 
+    std::unordered_map<char, std::pair<double, double>>& _intervals,
+    double _right,
+    double _left
+    )
+{
+    double full_stretch = _right - _left;
+    
+    for (auto& p : _probabilities)
+    {
+        double percent_stretch = p.second * full_stretch; 
+
+        double left = _right - percent_stretch;
+        if(left < 0.0 || left > 1.0)
+            left = 0;
+
+        _intervals[p.first] = {left, _right};
+        _right -= percent_stretch;
+    }
     
 
-    return 0;
 }
+
+double get_code(
+    std::string _text, 
+    std::unordered_map<char, double>& _probabilities,
+    std::unordered_map<char, std::pair<double, double>>& _intervals
+    ) 
+{
+    double probability = 1;
+    double right = 1.0;
+    double left = 0;
+    
+    for(size_t i = 0; i < _text.length(); ++i)
+    {
+        char symbol = _text.at(i);
+
+        //Получаем значение для отрезка для текущего символа
+        probability = ((right - left) * _probabilities.at(symbol)) + left;
+        
+        //Высчитываем новые интервалы и обновляем левые, правые границы
+        build_interval_table(_probabilities, _intervals, right, left);
+
+        left = _intervals.at(symbol).first;
+        right = _intervals.at(symbol).second;
+    
+        //std::cout << probability << " - ";
+        //std::cout << "[" << left << ", " << right << "]" << std::endl;
+    }    
+
+    return probability;
+}
+
+std::string decode(
+    std::unordered_map<char, double>& _probabilities,
+    std::unordered_map<char, std::pair<double, double>>& _intervals,
+    double _probability
+    )
+{
+    std::string text;
+
+    //double probability = 1;
+    double right = 1.0;
+    double left = 0;
+    
+    int flag = 1;
+    while(flag)
+    {
+        build_interval_table(_probabilities, _intervals, right, left);
+
+        for (auto &[key, value] : _intervals)
+        {
+            if(value.first < _probability && _probability < value.second)
+            {
+                text.push_back(key);
+                left = _intervals.at(key).first;
+                right = _intervals.at(key).second;
+
+                if(key == '!')
+                    flag = 0;
+
+                break;
+            }
+        }
+    }
+
+    std::cout << text << std::endl;
+    return text;
+}
+
 
 int main()
 {
     using namespace std;
 
-    vector<int> v(SIZE_TABLE_CODE, 0);
-    v[0] = 5;
-    
-    get_frequency("", v);
-    cout << v[0];
+    string text = "abaabaaca!";
+                   abaabaacaaaaab!
+    unordered_map<char, double> probabilities;
+    unordered_map<char, pair<double, double>> intervals;
+
+    arithmetic_coding_probability(text, probabilities);
+     
+    double res = get_code(text, probabilities, intervals);
+
+    decode(probabilities, intervals, res);
+
     return 0;
 }
