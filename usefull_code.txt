@@ -1,0 +1,98 @@
+/*
+build_interval_table(probabilities, intervals, 0.6);
+
+    cout << "Интервалы:" << endl;
+    for (auto &[key, value] : intervals)
+        //cout << key << " : [" << value.first << ", " << value.second << "]\n";
+        cout << key << " : [" << value.second - value.first << "]" << endl;  
+*/
+
+/*
+cout << "Вероятность символов:" << endl;
+    for(auto& p : probabilities)
+    {
+        cout << p.first << " : [" << p.second << "]" << endl;
+    }
+*/
+
+/*
+int main() 
+{
+    std::string action;
+    std::cout << "Would you like to encode or decode? (Enter 'encode' or 'decode'): ";
+    std::cin >> action;
+
+    if (action == "encode") 
+    {
+        std::string source;
+        std::cout << "Would you like to encode a file or text? (Enter 'file' or 'text'): ";
+        std::cin >> source;
+    
+        if (source == "file") 
+        {
+            std::string fileName;
+            std::cout << "Enter the name of the file you would like to encode: ";
+        
+            std::cin >> fileName;
+            std::cout << "Encoding file: " << fileName << std::endl;
+        
+            // Code for encoding the file goes here
+        } 
+        
+        else if (source == "text") 
+        {
+            std::string text;
+        
+            std::cout << "Enter the text you would like to encode: ";
+            std::cin.ignore();
+        
+            std::getline(std::cin, text);
+            std::cout << "Encoding text: " << text << std::endl;
+        
+            // Code for encoding the text goes here
+        } 
+        
+        else 
+        {
+            std::cout << "Invalid input. Please enter 'file' or 'text'." << std::endl;
+            return 0;
+        }
+    } 
+    
+    else if (action == "decode") 
+    {
+        std::string destination;
+    
+        std::cout << "Would you like to decode to a file or the screen? (Enter 'file' or 'screen'): ";
+        std::cin >> destination;
+    
+        if (destination == "file") 
+        {
+            std::string file_name;
+        
+            std::cout << "Enter the name of the file you would like to decode: ";
+            std::cin >> file_name;
+        
+            std::cout << "Decoding file: " << file_name << std::endl;
+            // Code for decoding the file goes here
+        } 
+        
+        else if (destination == "screen") 
+        {
+            std::cout << "Decoding to screen." << std::endl;
+            // Code for decoding to the screen goes here
+        } 
+        
+        else 
+        {
+            std::cout << "Invalid input. Please enter 'file' or 'screen'." << std::endl;
+            return 0;
+        }
+    }
+
+    else 
+    {
+        std::cout << "Invalid input. Please enter 'code' or 'decode'." << std::endl;
+        return 0;
+    }
+*/
